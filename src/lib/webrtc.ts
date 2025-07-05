@@ -1,8 +1,22 @@
+import { Socket } from 'socket.io-client'
+
+interface WebRTCData {
+  roomId: string
+  userId?: string
+  targetUserId?: string
+  fromUserId?: string
+  offer?: RTCSessionDescriptionInit
+  answer?: RTCSessionDescriptionInit
+  candidate?: RTCIceCandidate
+  type?: string
+  voiceUsers?: string[]
+}
+
 class WebRTCManager {
   private localStream: MediaStream | null = null
   private screenStream: MediaStream | null = null
   private peerConnections: Map<string, RTCPeerConnection> = new Map()
-  private socket: any = null
+  private socket: Socket | null = null
   private roomId: string = ''
   private userId: string = ''
   private remoteStreams: Map<string, MediaStream> = new Map()
@@ -18,7 +32,7 @@ class WebRTCManager {
     // Constructor will be called when imported
   }
 
-  setSocket(socket: any, roomId: string, userId: string) {
+  setSocket(socket: Socket, roomId: string, userId: string) {
     this.socket = socket
     this.roomId = roomId
     this.userId = userId
@@ -231,8 +245,10 @@ class WebRTCManager {
     return pc
   }
 
-  private async handleOffer(data: any) {
+  private async handleOffer(data: WebRTCData) {
     const { fromUserId, offer } = data
+    if (!fromUserId || !offer) return
+    
     console.log(`Received offer from ${fromUserId}`)
     
     const pc = await this.createPeerConnection(fromUserId, false)
@@ -252,8 +268,10 @@ class WebRTCManager {
     })
   }
 
-  private async handleAnswer(data: any) {
+  private async handleAnswer(data: WebRTCData) {
     const { fromUserId, answer } = data
+    if (!fromUserId || !answer) return
+    
     console.log(`Received answer from ${fromUserId}`)
     
     const pc = this.peerConnections.get(fromUserId)
@@ -266,8 +284,10 @@ class WebRTCManager {
     }
   }
 
-  private async handleIceCandidate(data: any) {
+  private async handleIceCandidate(data: WebRTCData) {
     const { fromUserId, candidate } = data
+    if (!fromUserId || !candidate) return
+    
     console.log(`Received ICE candidate from ${fromUserId}`)
     
     const pc = this.peerConnections.get(fromUserId)
@@ -284,8 +304,10 @@ class WebRTCManager {
     }
   }
 
-  private async handleUserJoined(data: any) {
+  private async handleUserJoined(data: WebRTCData) {
     const { userId } = data
+    if (!userId) return
+    
     console.log('User joined, creating peer connection:', userId)
     
     if (userId !== this.userId && this.localStream) {
@@ -294,8 +316,10 @@ class WebRTCManager {
     }
   }
 
-  private async handleUserReady(data: any) {
+  private async handleUserReady(data: WebRTCData) {
     const { userId, type } = data
+    if (!userId) return
+    
     console.log('User ready for WebRTC:', userId, type)
     
     if (userId !== this.userId) {
@@ -304,8 +328,10 @@ class WebRTCManager {
     }
   }
 
-  private handleUserLeft(data: any) {
+  private handleUserLeft(data: WebRTCData) {
     const { userId } = data
+    if (!userId) return
+    
     console.log('User left, cleaning up connection:', userId)
     
     const pc = this.peerConnections.get(userId)
@@ -329,8 +355,10 @@ class WebRTCManager {
     }
   }
 
-  private async handleVoiceUsersList(data: any) {
+  private async handleVoiceUsersList(data: WebRTCData) {
     const { voiceUsers } = data
+    if (!voiceUsers) return
+    
     console.log('Received voice users list:', voiceUsers)
     
     // Create peer connections with all users currently in voice chat
@@ -342,8 +370,10 @@ class WebRTCManager {
     }
   }
 
-  private async handleUserVoiceStarted(data: any) {
+  private async handleUserVoiceStarted(data: WebRTCData) {
     const { userId } = data
+    if (!userId) return
+    
     console.log('User started voice chat:', userId)
     
     // If we have voice active and don't have a connection with this user, create one

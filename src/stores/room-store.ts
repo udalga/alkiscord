@@ -27,7 +27,7 @@ interface RoomState {
   clearRoom: () => void
 }
 
-export const useRoomStore = create<RoomState>((set, get) => ({
+export const useRoomStore = create<RoomState>((set) => ({
   currentUser: null,
   currentRoom: null,
   isConnected: false,

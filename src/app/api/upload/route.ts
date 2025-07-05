@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const uploadsDir = join(process.cwd(), 'public', 'uploads', roomId)
     try {
       await mkdir(uploadsDir, { recursive: true })
-    } catch (error) {
+    } catch {
       // Directory might already exist
     }
 

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { Server as NetServer } from 'http'
-import { Server as SocketIOServer } from 'socket.io'
+import { Server as SocketIOServer, Socket } from 'socket.io'
 import { 
   ServerToClientEvents, 
   ClientToServerEvents, 
@@ -12,8 +12,10 @@ import {
 import { generateUserId } from '@/lib/utils'
 
 // Import rooms from the create route
-let rooms: Map<string, any>
+import { Room } from '@/types'
+let rooms: Map<string, Room>
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   rooms = require('../rooms/create/route').rooms
 } catch {
   rooms = new Map()
@@ -25,7 +27,7 @@ let io: SocketIOServer<ClientToServerEvents, ServerToClientEvents, InterServerEv
 
 export async function GET(req: NextRequest) {
   if (!io) {
-    const httpServer: NetServer = (req as any).socket.server
+    const httpServer: NetServer = (req as NextRequest & { socket: { server: NetServer } }).socket.server
     io = new SocketIOServer(httpServer, {
       path: '/api/socket',
       addTrailingSlash: false,
@@ -172,7 +174,7 @@ export async function GET(req: NextRequest) {
       })
     })
 
-    function handleUserLeave(socket: any, roomId: string) {
+    function handleUserLeave(socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>, roomId: string) {
       try {
         const room = rooms.get(roomId)
         if (!room || !socket.data.userId) return

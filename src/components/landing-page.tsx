@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { AVATAR_OPTIONS, Avatar as AvatarType } from '@/types'
 import { useUserPreferences } from '@/stores/room-store'
-import { generateRoomId } from '@/lib/utils'
 import { Users, Plus, LogIn, MessageCircle, Share, Mic, Sparkles, Zap, Shield, Globe } from 'lucide-react'
 
 export function LandingPage() {
@@ -27,7 +25,6 @@ export function LandingPage() {
   const handleCreateRoom = async () => {
     if (!roomName.trim() || !tempNickname.trim()) return
 
-    const roomId = generateRoomId()
     setNickname(tempNickname)
     setAvatar(tempAvatar)
 

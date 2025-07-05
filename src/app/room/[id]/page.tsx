@@ -6,7 +6,6 @@ import { useRoomStore, useUserPreferences } from '@/stores/room-store'
 import { connectSocket, getSocket } from '@/lib/socket'
 import { RoomInterface } from '@/components/room/room-interface'
 import { JoinRoomDialog } from '@/components/room/join-room-dialog'
-import { generateUserId } from '@/lib/utils'
 
 export default function RoomPage() {
   const params = useParams()
@@ -38,9 +37,19 @@ export default function RoomPage() {
   useEffect(() => {
     // If user has preferences and is not in a room, try to join automatically
     if (nickname && avatar && !currentRoom && !isJoining) {
-      handleJoinRoom(nickname, avatar)
+      const socket = getSocket()
+      if (!socket) return
+
+      setJoining(true)
+      setError(null)
+      
+      socket.emit('room:join', {
+        roomId,
+        nickname,
+        avatar
+      })
     }
-  }, [nickname, avatar, currentRoom, isJoining])
+  }, [nickname, avatar, currentRoom, isJoining, roomId, setJoining, setError])
 
   useEffect(() => {
     const socket = connectSocket()
@@ -98,7 +107,7 @@ export default function RoomPage() {
       socket.off('room:screen-share-toggle')
       socket.off('room:error')
     }
-  }, [])
+  }, [addMessage, addUser, removeUser, setConnected, setCurrentRoom, setCurrentUser, setError, setJoining, updateUserScreenShare, updateUserVoice])
 
   const handleJoinRoom = (nickname: string, avatar: string) => {
     const socket = getSocket()
@@ -113,6 +122,7 @@ export default function RoomPage() {
       avatar
     })
   }
+
 
   const handleLeaveRoom = () => {
     const socket = getSocket()

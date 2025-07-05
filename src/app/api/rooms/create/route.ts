@@ -3,7 +3,7 @@ import { CreateRoomData, Room } from '@/types'
 import { generateRoomId, generateUserId } from '@/lib/utils'
 
 // Use global rooms from server.js
-const rooms = (global as any).rooms || new Map<string, Room>()
+const rooms = (global as { rooms?: Map<string, Room> }).rooms || new Map<string, Room>()
 
 export async function POST(request: NextRequest) {
   try {

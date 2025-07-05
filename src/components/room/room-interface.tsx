@@ -23,10 +23,8 @@ import {
   Image,
   Video,
   File,
-  Settings,
   Hash,
-  Crown,
-  Smile
+  Crown
 } from 'lucide-react'
 
 interface RoomInterfaceProps {
