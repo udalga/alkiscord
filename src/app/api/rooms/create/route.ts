@@ -56,6 +56,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
-// Export rooms for use in other API routes
-export { rooms }
